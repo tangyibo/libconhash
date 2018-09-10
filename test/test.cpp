@@ -39,12 +39,17 @@ public:
     
     void add_node(const char *iden,const int replica)
     {
-        struct node_s *node=new(std::nothrow) struct node_s;
-        assert(NULL!=node);
-        
-        conhash_set_node(node, iden,replica);
-        conhash_add_node(_conhash, node);
-        _nodemaps[iden] = node;
+        std::map<std::string, void*>::iterator it;
+        it = _nodemaps.find(iden);
+        if (_nodemaps.end() == it)
+        {
+            struct node_s *node = new(std::nothrow) struct node_s;
+            assert(NULL != node);
+
+            conhash_set_node(node, iden, replica);
+            conhash_add_node(_conhash, node);
+            _nodemaps[iden] = node;
+        }
     }
     
     void delete_node(const char *iden)
@@ -111,7 +116,7 @@ int main(int argc,char *argv[])
     std::cout << "real nodes number :" << hash.rnodes_num() << std::endl;
     std::cout << "the hashing results------------------:" << std::endl;
 
-    for (int i = 1; i <= 200; i++) 
+    for (int i = 1; i <= 30; i++) 
     {
         char str[64];
         sprintf(str, "Redis-key.km%03d", i);
@@ -121,6 +126,11 @@ int main(int argc,char *argv[])
         if(i==15)
         {
             hash.delete_node("192.168.100.4;10091");
+        }
+        
+        if(i==20)
+        {
+            hash.add_node("192.168.100.4;10091",50);
         }
     }
     
